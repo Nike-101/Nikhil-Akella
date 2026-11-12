@@ -856,7 +856,7 @@ var DRIVE="https://drive.google.com/";
  ["Harvard Bionics Lab",12.6,6.9,3.2,"harvard","#bio"],["BITS Pilani",-2.4,9.8,-9,"bits","#experience"],["YC Startup School",-26.6,6.2,3.4,"yc","#experience"]
 ].forEach(function(d,i){var o=makeDrone(d[0],d[1],d[2],d[3],i*1.7,d[4]);o.href=d[5];o.open=d[6];o.logo=!!(d[4]&&window.LOGOS&&LOGOS[d[4]]);o.sw=2.4;o.sh=.6;});
 
-/* =================== Distant campuses: BITS Pilani Hyderabad + Harvard (Widener Library) =================== */
+/* =================== Distant campus: Harvard (Widener Library) =================== */
 function facade(w,h,base,win,cols,rows,o){o=o||{};
   var c=document.createElement("canvas");c.width=512;c.height=Math.max(64,Math.round(512*h/w/32)*32);var x=c.getContext("2d");
   var e=document.createElement("canvas");e.width=c.width;e.height=c.height;var ex=e.getContext("2d");ex.fillStyle="#000";ex.fillRect(0,0,e.width,e.height);
@@ -880,38 +880,6 @@ function tree(parent,x,z,s){var g=new T.Group();g.position.set(x,0,z);g.scale.se
   var lm=new T.MeshStandardMaterial({color:0x2c5a2e,roughness:.9});
   [[0,3,0,1.6],[.9,2.6,.3,1.1],[-.8,2.7,-.2,1.2],[.1,3.6,.4,1.0]].forEach(function(q){var b=new T.Mesh(new T.IcosahedronGeometry(q[3],1),lm);b.position.set(q[0],q[1],q[2]);g.add(b);});}
 function bannerTex(draw,w,h){var c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);var t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.anisotropy=4;return {tex:t,canvas:c};}
-
-/* BITS Pilani, Hyderabad */
-(function(){
-  var g=new T.Group();g.position.set(-28,0,-100);g.rotation.y=.24;g.scale.setScalar(2.1);S.add(g);
-  var pink="#b98479",pinkD="#9a685f";
-  var sideM=new T.MeshStandardMaterial({color:0xae7a70,roughness:.9});
-  var lawn=new T.MeshStandardMaterial({color:0x2f5e2c,roughness:1});
-  var path=new T.MeshStandardMaterial({color:0x8d969a,roughness:.9});
-  var L=new T.Mesh(new T.PlaneGeometry(56,30),lawn);L.rotation.x=-PI/2;L.position.set(0,.03,14);g.add(L);
-  var P=new T.Mesh(new T.PlaneGeometry(4,30),path);P.rotation.x=-PI/2;P.position.set(0,.05,14);g.add(P);
-  var cross=new T.Mesh(new T.PlaneGeometry(40,1.6),path);cross.rotation.x=-PI/2;cross.position.set(0,.05,8);g.add(cross);
-  // central block with dome
-  slab(16,10,9,facade(16,10,pink,"#3a2c2a",10,4,{bands:pinkD}),sideM,g,0,5,0);
-  var ent=new T.Mesh(new T.BoxGeometry(5,6,.6),new T.MeshStandardMaterial({color:0x2e3236,emissive:0x2a3a40,emissiveIntensity:.6}));ent.position.set(0,3,4.6);g.add(ent);
-  var drum=new T.Mesh(new T.CylinderGeometry(3.2,3.2,1.4,40),new T.MeshStandardMaterial({color:0xd8cfc6,roughness:.7}));drum.position.y=10.7;g.add(drum);
-  var dome=new T.Mesh(new T.SphereGeometry(3.2,40,20,0,PI*2,0,PI/2),new T.MeshStandardMaterial({color:0xe6e0d8,roughness:.5,metalness:.1}));dome.position.y=11.4;g.add(dome);
-  var top=new T.Mesh(new T.BoxGeometry(5,1.4,3),sideM);top.position.set(0,10.7,-3.2);g.add(top);
-  // wings
-  [-1,1].forEach(function(sd){
-    slab(11,8,10,facade(11,8,pink,"#3a2c2a",7,3,{bands:pinkD}),sideM,g,sd*13.5,4,-.5);
-    slab(8,10,9,facade(8,10,pink,"#3a2c2a",5,4,{bands:pinkD}),sideM,g,sd*22.5,5,1.5);
-    slab(5,6,8,facade(5,6,pink,"#3a2c2a",3,2),sideM,g,sd*28.5,3,3);
-  });
-  // campus banner
-  var bt=bannerTex(function(c,w,h){c.fillStyle="#1d3f8a";c.fillRect(0,0,w,h);c.fillStyle="#ffffff";c.font="600 50px 'IBM Plex Sans', Arial, sans-serif";c.textAlign="center";c.textBaseline="middle";c.fillText("BITS PILANI, HYDERABAD CAMPUS",w/2,h/2+2);},1024,128);
-  var bn=new T.Mesh(new T.PlaneGeometry(10,1.25),new T.MeshBasicMaterial({map:bt.tex}));bn.position.set(0,1.4,5.6);g.add(bn);
-  var bnb=new T.Mesh(new T.BoxGeometry(10.4,1.5,.2),new T.MeshStandardMaterial({color:0x14254d}));bnb.position.set(0,1.4,5.48);g.add(bnb);
-  // palm-lined walkway + cycas hedges
-  for(var z=7;z<29;z+=2.6){palm(g,0,z,.9);}
-  for(var z2=3;z2<26;z2+=5){[-1,1].forEach(function(sd){palm(g,sd*9,z2+1,.75);palm(g,sd*17,z2+2,.75);});}
-  window.__campusBITS=g;
-})();
 
 /* Harvard University: Widener Library */
 (function(){
@@ -961,7 +929,7 @@ var dust=new T.Points(dg,new T.PointsMaterial({color:0x8fd8cf,size:.045,transpar
 
 /* ---------- labels ---------- */
 var labelsEl=document.getElementById("labels"),labels=[];
-[["ST-01 About",-30,6.6,0],["ST-02 Robot cell",-16,4.4,0],["ST-03 QC gate",0,3.6,0],["ST-04 Bionics lab",15,7.8,-1],["ST-05 Gear wall",-6,11.6,-12],["BITS Pilani, Hyderabad",-28,32,-100],["Harvard University",50,31,-104],["AGV-01",0,0,0,"agv"]].forEach(function(l){
+[["ST-01 About",-30,6.6,0],["ST-02 Robot cell",-16,4.4,0],["ST-03 QC gate",0,3.6,0],["ST-04 Bionics lab",15,7.8,-1],["ST-05 Gear wall",-6,11.6,-12],["Harvard University",50,31,-104],["AGV-01",0,0,0,"agv"]].forEach(function(l){
   var el=document.createElement("div");el.className="label3d";el.innerHTML="<i></i><span>"+l[0]+"</span>";labelsEl.appendChild(el);
   labels.push({el:el,p:new T.Vector3(l[1],l[2],l[3]),follow:l[4]});
 });
