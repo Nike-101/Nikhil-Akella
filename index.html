@@ -283,7 +283,8 @@ details.proj[data-exhibit][open]{border-color:rgba(79,227,255,.55);box-shadow:0 
   .tabs button small{display:none}
   .chip-demo{margin-left:auto}
   .panel{left:0;width:100%;top:auto;bottom:0;height:44%;border-radius:28px 28px 0 0;border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px);transition:left 1s var(--ease),width 1s var(--ease),height 1s var(--ease),bottom 1s var(--ease),border-radius 1s var(--ease)}
-  .panel.island{left:calc(50% - 140px);width:280px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);border-radius:26px;border-bottom:1px solid var(--lg-border);padding-bottom:0}
+  .panel.island{left:calc(50% - 120px);width:240px;height:46px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);border-radius:23px;border-bottom:1px solid var(--lg-border);padding-bottom:0}
+  .island-label{font-size:11px;gap:8px}.island-label em{font-size:12px}
   .pmin{display:none}
   .scroll{padding:24px var(--gr) 24px var(--gl)}
   .hud{display:none}
@@ -933,21 +934,25 @@ JOUR.forEach(function(j,i){
     dir.push([r*Math.cos(a)*(.5+Math.random()*1.4),u*(.4+Math.random()*1.1),r*Math.sin(a)*(.5+Math.random()*1.4),Math.random()]);}
   var pg=new T.BufferGeometry();pg.setAttribute("position",new T.BufferAttribute(pos,3));
   var pm=new T.PointsMaterial({color:i%2?0x6fd0c4:0xf2a93b,size:.07,transparent:true,opacity:0,depthWrite:false});var pts=new T.Points(pg,pm);g.add(pts);
-  jTokens.push({g:g,holder:holder,mats:mats,pts:pts,pg:pg,dir:dir,bob:Math.random()*6});
+  jTokens.push({g:g,holder:holder,mats:mats,pts:pts,pg:pg,dir:dir,bob:Math.random()*6,isl:isl,bw:bw});
 });
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){jTokens.forEach(function(tk){tk.holder.children.forEach(function(c){if(c.userData.redraw)c.userData.redraw();});});});
+var JN=[[-1.3,1.2,2.4],[-1.45,3.9,-.1],[.15,6.3,-.2],[1.45,2.9,1.4]];
+function jPos(i,narrow){return narrow?JN[i]:JOUR[i].p;}
+var arrW=new T.Group(),arrN=new T.Group();gal.add(arrW);gal.add(arrN);
 var jCenter=new T.Vector3(0,3.4,.2);
+[[arrW,false],[arrN,true]].forEach(function(set){
 for(var ai=0;ai<JOUR.length-1;ai++){
-  var A=new T.Vector3().fromArray(JOUR[ai].p),B=new T.Vector3().fromArray(JOUR[ai+1].p),M=A.clone().add(B).multiplyScalar(.5);
-  M.add(M.clone().sub(jCenter).multiplyScalar(.45));
-  var full=new T.CatmullRomCurve3([A,M,B]),pts2=[];for(var q2=0;q2<=40;q2++)pts2.push(full.getPoint(.16+q2/40*.66));
+  var A=new T.Vector3().fromArray(jPos(ai,set[1])),B=new T.Vector3().fromArray(jPos(ai+1,set[1])),M=A.clone().add(B).multiplyScalar(.5);
+  M.add(M.clone().sub(jCenter).multiplyScalar(set[1]?.3:.45));
+  var full=new T.CatmullRomCurve3([A,M,B]),pts2=[];for(var q2=0;q2<=40;q2++)pts2.push(full.getPoint((set[1]?.22:.16)+q2/40*(set[1]?.56:.66)));
   var curve=new T.CatmullRomCurve3(pts2);
   var tg=new T.TubeGeometry(curve,80,.022,8,false),tm=new T.MeshBasicMaterial({color:0x6fd0c4,transparent:true,opacity:0,depthWrite:false});
-  var tube=new T.Mesh(tg,tm);tube.visible=false;gal.add(tube);
+  var tube=new T.Mesh(tg,tm);tube.visible=false;set[0].add(tube);
   var hm=new T.MeshBasicMaterial({color:0x6fd0c4,transparent:true,opacity:0,depthWrite:false});var head=new T.Mesh(new T.ConeGeometry(.08,.22,16),hm);
-  head.position.copy(curve.getPoint(1));head.quaternion.setFromUnitVectors(UP,curve.getTangent(1).normalize());head.visible=false;gal.add(head);
-  jArrows.push({tube:tube,head:head,count:tg.index.count,tm:tm,hm:hm});
-}
+  head.position.copy(curve.getPoint(1));head.quaternion.setFromUnitVectors(UP,curve.getTangent(1).normalize());head.visible=false;set[0].add(head);
+  jArrows.push({tube:tube,head:head,count:tg.index.count,tm:tm,hm:hm,idx:ai});
+}});
 var J={phase:"hidden",t:0},jCam=new T.Vector3();
 window.__journey=function(v,instant){
   if(v==="about"){if(J.phase!=="in"&&J.phase!=="shown"){J.phase="in";J.t=instant?.2:0;}}
@@ -1028,10 +1033,12 @@ function updateCases(t,dt){
 
 function updateJourney(t,dt){
   if(J.phase==="hidden")return;
-  J.t+=dt;var T0=.9,STEP=1.05;
+  J.t+=dt;var T0=.9,STEP=1.05,nar=innerWidth<=760;
   gal.updateMatrixWorld();
   jTokens.forEach(function(tk,i){
-    tk.g.position.y=JOUR[i].p[1]+Math.sin(t*.8+tk.bob)*.09;
+    var jp=jPos(i,nar);tk.g.position.set(jp[0],jp[1]+Math.sin(t*.8+tk.bob)*.09,jp[2]);
+    tk.g.scale.setScalar(nar?.82:1);
+    if(nar){tk.isl.position.set(0,-1.22,.02);tk.isl.scale.set(3.3,3.3*340/1024,1);}else{tk.isl.position.set(JOUR[i].side*(tk.bw/2+.18+1.65),0,.02);tk.isl.scale.set(3.3,3.3*340/1024,1);}
     tk.holder.lookAt(jCam.copy(C.position));tk.holder.rotation.x*=.25;tk.holder.rotation.z=0;
     var appear,dust,drift=0,da;
     if(J.phase==="in"||J.phase==="shown"){var k=J.phase==="shown"?1:(J.t-(T0+i*STEP))/1.1;
@@ -1041,7 +1048,8 @@ function updateJourney(t,dt){
       setTokenAlpha(tk,1-ezo(kk/.45));tk.holder.scale.setScalar(1-.15*ezo(kk));setDust(tk,.2+ezo(kk)*1.6,ezo(kk)*1.4,kk<=0?0:Math.min(1,kk*5)*(1-ezo(kk)));
       if(ko>=1)tk.g.visible=false;}
   });
-  jArrows.forEach(function(ar,i){
+  arrW.visible=!nar;arrN.visible=nar;
+  jArrows.forEach(function(ar){var i=ar.idx;
     if(J.phase==="in"||J.phase==="shown"){var k=J.phase==="shown"?1:(J.t-(T0+i*STEP+.75))/.8;var pr=ezo(k);
       ar.tube.visible=pr>0;ar.tube.geometry.setDrawRange(0,Math.floor(ar.count*pr/3)*3);ar.tm.opacity=.75*Math.min(1,pr*2);
       ar.head.visible=pr>.97;ar.hm.opacity=pr>.97?.9:0;}
@@ -1583,6 +1591,7 @@ var fromP=camPos.clone(),fromT=camTgt.clone(),toP=camPos.clone(),toT=camTgt.clon
 function presetFor(v){
   var pr=PRE[v],p=new T.Vector3().fromArray(pr.p),c=new T.Vector3().fromArray(pr.c);
   var narrow=innerWidth<=760;
+  if(narrow&&v==="about"){var isl=window.__isIsland&&__isIsland();return {p:c.clone().add(p.clone().sub(c).multiplyScalar(isl?1.6:1.85)),t:c.clone().add(new T.Vector3(.2,isl?-.9:-3.5,0))};}
   if(narrow&&window.__isIsland&&__isIsland()){return {p:c.clone().add(p.clone().sub(c).multiplyScalar(1.35)),t:c};}
   if(narrow){var ex=v.indexOf("ex-")===0,ct=v==="contact";p=c.clone().add(p.clone().sub(c).multiplyScalar(ct?2.4:ex?1.8:1.3));c.y-=ct?2.5:ex?2.6:1.8;return {p:p,t:c};}
   var dir=c.clone().sub(p).normalize(),right=new T.Vector3().crossVectors(dir,UP).normalize();
@@ -1682,7 +1691,7 @@ function frame(now){
   // bio
   drones.forEach(function(d){var p=d.ph;
     d.g.position.set(d.base.x+Math.sin(t*.22+p)*.6,d.base.y+Math.sin(t*.6+p)*.08,d.base.z+Math.sin(t*.3+p)*.25);
-    d.rig.rotation.z=0;d.rig.rotation.x=0;d.g.visible=(innerWidth>760||d.g.position.distanceTo(camTgt)<11)&&!(d.isCase&&activeKey==="product");d.g.rotation.y=Math.sin(t*.15+p)*.06;var hs=d.scr.scale.x+((d.hover?1.08:1)-d.scr.scale.x)*.15;d.scr.scale.setScalar(hs);
+    d.rig.rotation.z=0;d.rig.rotation.x=0;d.g.visible=(innerWidth>760||d.g.position.distanceTo(camTgt)<11)&&!(d.isCase&&activeKey==="product")&&!(innerWidth<=760&&activeKey==="about");d.g.rotation.y=Math.sin(t*.15+p)*.06;var hs=d.scr.scale.x+((d.hover?1.08:1)-d.scr.scale.x)*.15;d.scr.scale.setScalar(hs);
     d.rotors.forEach(function(r,k){r.rotation.y=t*(k%2?-38:38);});
     d.led.material.color.setHex((Math.sin(t*4+p)>.6)?0xf2a93b:0x9be0b0);});
   frames.forEach(function(f){f.position.y=f.userData.y+Math.sin(t*.6+f.userData.ph)*.08;});
