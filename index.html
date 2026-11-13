@@ -1442,10 +1442,10 @@ function updateExhibits(t){
 /* =================== Contact: fit humanoid that waves, then points at LinkedIn =================== */
 var HX=-3,HZ=13.2,LI_URL="https://www.linkedin.com/in/nikhil101akella/";
 var bot=(function(){
-  var W=new T.MeshStandardMaterial({color:0xeef1f2,metalness:.18,roughness:.3});
-  var D=new T.MeshStandardMaterial({color:0x14181b,metalness:.75,roughness:.32});
-  var G=new T.MeshStandardMaterial({color:0x5b646a,metalness:.85,roughness:.28});
-  var V=new T.MeshStandardMaterial({color:0x040506,metalness:.95,roughness:.06});
+  var W=new T.MeshStandardMaterial({color:0xbfc2c4,metalness:.02,roughness:.85});   // soft-touch light grey shell
+  var D=new T.MeshStandardMaterial({color:0x0c0d0f,metalness:.35,roughness:.38});    // black joints
+  var G=new T.MeshStandardMaterial({color:0x1d2023,metalness:.4,roughness:.45});
+  var V=new T.MeshStandardMaterial({color:0x050506,metalness:.6,roughness:.08});     // glossy black head
   var EYE=new T.MeshBasicMaterial({color:0x4fe3ff});
   function sp(r,sx,sy,sz,mat,par,x,y,z){var m=new T.Mesh(new T.SphereGeometry(r,28,18),mat);m.scale.set(sx,sy,sz);m.position.set(x||0,y||0,z||0);par.add(m);return m;}
   function cy(rt,rb,h,mat,par,x,y,z){var m=new T.Mesh(new T.CylinderGeometry(rt,rb,h,24),mat);m.position.set(x||0,y||0,z||0);par.add(m);return m;}
@@ -1455,61 +1455,57 @@ var bot=(function(){
   var ring=new T.Mesh(new T.TorusGeometry(1.32,.025,10,120),new T.MeshBasicMaterial({color:0x4fe3ff}));ring.rotation.x=PI/2;ring.position.y=.01;root.add(ring);
   var body=new T.Group();root.add(body);
   function tc(rt,rb,h,mat,par,x,y,z,seg){var m=new T.Mesh(new T.CylinderGeometry(rt,rb,h,seg||28),mat);m.position.set(x||0,y||0,z||0);par.add(m);return m;}
-  // ---- legs: hip -> knee -> ankle chain so they can bend ----
+  function cap(r,len,mat,par,x,y,z,sx,sz){var m=new T.Mesh(new T.CylinderGeometry(r,r,len,28),mat);m.position.set(x||0,y||0,z||0);m.scale.set(sx||1,1,sz||1);par.add(m);
+    var a=sp(r,1,.55,1,mat,m,0,len/2,0),b=sp(r,1,.55,1,mat,m,0,-len/2,0);return m;}
+  // ---- legs: hip -> knee -> ankle chain ----
   var legs=[];
   [-1,1].forEach(function(sd){
-    var hip=new T.Group();hip.position.set(sd*.1,.93,0);body.add(hip);
-    sp(.062,1,1,1,D,hip);                                   // hip actuator
-    var th=tc(.086,.064,.36,W,hip,0,-.2,.005);th.scale.z=.92; // thigh shell
-    sp(.07,1,1.9,.85,W,hip,0,-.2,.03);                        // quad contour
-    tc(.03,.03,.3,G,hip,sd*-.05,-.22,-.02,12);                // inner actuator rod
+    var hip=new T.Group();hip.position.set(sd*.105,.95,0);body.add(hip);
+    sp(.07,1,1,1,D,hip,0,-.02,0);                               // hip joint
+    tc(.088,.07,.34,W,hip,0,-.21,0).scale.z=.95;                 // thigh
+    sp(.088,1,.4,.95,W,hip,0,-.04,0);
     var knee=new T.Group();knee.position.y=-.42;hip.add(knee);
-    sp(.052,1,1,1,D,knee);var kc=sp(.04,1,.75,.45,D,knee,0,.01,.035);  // knee joint + cap
-    tc(.062,.044,.36,W,knee,0,-.2,0);                          // shin shell
-    sp(.055,.95,2.1,.9,W,knee,0,-.15,-.03);                    // calf
-    tc(.022,.022,.3,G,knee,0,-.2,-.05,10);                     // achilles actuator
+    sp(.058,1.05,1,1,D,knee);                                     // black knee
+    tc(.066,.046,.34,W,knee,0,-.2,0);                            // shin
+    sp(.066,1,.4,1,W,knee,0,-.04,0);
     var ank=new T.Group();ank.position.y=-.42;knee.add(ank);
-    sp(.038,1,1,1,D,ank);
-    var ft=new T.Mesh(new T.BoxGeometry(.095,.05,.23),W);ft.position.set(0,-.045,.045);ank.add(ft);
-    var sole=new T.Mesh(new T.BoxGeometry(.1,.022,.24),D);sole.position.set(0,-.075,.045);ank.add(sole);
-    var toe=sp(.048,1,.5,.6,W,ank,0,-.045,.16);
+    sp(.042,1,1,1,D,ank);
+    var ft=new T.Mesh(new T.BoxGeometry(.09,.06,.22),W);ft.position.set(0,-.05,.04);ank.add(ft);
+    sp(.045,1,.65,.8,W,ank,0,-.05,.14);
+    var sole=new T.Mesh(new T.BoxGeometry(.095,.02,.24),D);sole.position.set(0,-.085,.05);ank.add(sole);
     legs.push({hip:hip,knee:knee,ank:ank,sd:sd});
   });
-  // ---- pelvis, waist, torso ----
-  sp(.16,1.05,.55,.72,D,body,0,.97,0);
-  var pelv=sp(.15,1.05,.42,.75,W,body,0,.99,.012);
-  tc(.095,.11,.16,D,body,0,1.1,0);                             // waist actuator
-  var abs1=tc(.13,.118,.08,D,body,0,1.15,0);abs1.scale.z=.74;
-  var abs2=tc(.142,.13,.08,D,body,0,1.235,0);[1.115,1.19,1.275].forEach(function(y,i){var r=tc(.124+i*.012,.124+i*.012,.012,G,body,0,y,0);r.scale.z=.74;});abs2.scale.z=.74;
-  var chest=new T.Group();chest.position.y=1.42;body.add(chest);
-  sp(.19,1.28,.9,.7,W,chest);                                   // chest shell
-  var pecL=sp(.1,1.15,.62,.4,W,chest,-.085,.035,.1),pecR=sp(.1,1.15,.62,.4,W,chest,.085,.035,.1); // pec plates
-  [-1,1].forEach(function(sd){var sl=new T.Mesh(new T.BoxGeometry(.13,.005,.012),D);sl.position.set(sd*.07,-.035,.132);sl.rotation.z=sd*.42;chest.add(sl);});
-  var collar=tc(.07,.11,.05,D,chest,0,.16,0);collar.scale.z=.7;
-  var pack=new T.Mesh(new T.BoxGeometry(.24,.3,.08),D);pack.position.set(0,-.02,-.15);chest.add(pack);
-  // ---- neck + head ----
-  tc(.04,.05,.09,D,body,0,1.6,-.005);
-  var head=new T.Group();head.position.set(0,1.72,0);body.add(head);
-  sp(.102,1,1.16,1.12,W,head);                                  // helmet
-  var visor=new T.Mesh(new T.SphereGeometry(.104,40,24,PI/2-1.0,2.0,.62,1.38),V);visor.scale.set(1.01,1.17,1.13);visor.position.z=.004;head.add(visor);
-  sp(.04,1.6,1,1,D,head,0,-.09,-.01);                           // jaw/neck joint
-  var eye=new T.Mesh(new T.BoxGeometry(.09,.006,.004),EYE);eye.position.set(0,.02,.116);head.add(eye);
+  // ---- black pelvis "brief" + waist ----
+  var pel=sp(.17,1,.62,.66,D,body,0,.97,0);
+  tc(.105,.13,.14,D,body,0,1.09,0).scale.z=.7;                  // waist joint
+  // ---- torso: one smooth tapered shell, flat front ----
+  var chest=new T.Group();chest.position.y=1.38;body.add(chest);
+  var tor=tc(.205,.145,.42,W,chest,0,0,0,40);tor.scale.z=.6;    // tapered torso (wide shoulders -> narrow waist)
+  var top=sp(.205,1,.32,.6,W,chest,0,.21,0);sp(.145,1,.28,.6,W,chest,0,-.21,0);                    // rounded shoulder line
+  var nb=tc(.06,.09,.05,W,chest,0,.25,0);nb.scale.z=.7;         // neck base
+  // subtle panel seams
+  var seam=new T.Mesh(new T.TorusGeometry(.17,.0025,6,48,PI),G);seam.rotation.z=PI;seam.position.set(0,.02,0);seam.scale.set(1,.55,.6);chest.add(seam);
+  // ---- neck + head (glossy black egg) ----
+  tc(.034,.042,.1,D,body,0,1.66,0);
+  var head=new T.Group();head.position.set(0,1.79,0);body.add(head);
+  sp(.098,.86,1.2,.98,V,head,0,0,0);                             // ovoid head
+  sp(.06,1,.8,1,V,head,0,-.07,-.01);                             // jaw taper
+  var eye=new T.Mesh(new T.BoxGeometry(.05,.004,.002),EYE);eye.position.set(0,.01,.095);head.add(eye);
   // ---- arms ----
   function arm(sd){
-    var sh=new T.Group();sh.position.set(sd*.26,1.49,0);body.add(sh);
-    sp(.066,1.1,1,1,W,sh);sp(.048,1,1,1,D,sh,sd*-.035,0,0);
-    tc(.056,.047,.25,W,sh,0,-.15,0);sp(.05,1,1.7,1.05,W,sh,0,-.13,.02);
+    var sh=new T.Group();sh.position.set(sd*.255,1.56,0);body.add(sh);
+    sp(.062,1,1,1,D,sh);                                          // black shoulder joint
+    tc(.056,.05,.24,W,sh,0,-.15,0);sp(.056,1,.4,1,W,sh,0,-.035,0);// upper arm
     var el=new T.Group();el.position.y=-.29;sh.add(el);
-    sp(.043,1,1,1,D,el);
-    tc(.05,.036,.24,W,el,0,-.14,0);sp(.045,1,1.9,1,W,el,0,-.09,0);
-    var hand=new T.Group();hand.position.y=-.28;el.add(hand);
+    sp(.046,1,1.05,1,D,el);                                       // black elbow
+    tc(.049,.036,.22,W,el,0,-.14,0);sp(.049,1,.4,1,W,el,0,-.035,0);// forearm
+    var hand=new T.Group();hand.position.y=-.27;el.add(hand);
     sp(.03,1,1,1,D,hand);
-    var palm=new T.Mesh(new T.BoxGeometry(.07,.08,.028),D);palm.position.y=-.045;hand.add(palm);
-    var back=new T.Mesh(new T.BoxGeometry(.066,.07,.01),W);back.position.set(0,-.042,-.017);hand.add(back);
-    var fingers=[];for(var f=0;f<4;f++){var fp=new T.Group();fp.position.set(sd*(-.026+f*.0175),-.087,0);hand.add(fp);
-      var f1=new T.Mesh(new T.BoxGeometry(.013,.034,.015),W);f1.position.y=-.017;fp.add(f1);
-      var f2=new T.Mesh(new T.BoxGeometry(.012,.028,.014),D);f2.position.y=-.047;fp.add(f2);fingers.push(fp);}
-    var th=new T.Group();th.position.set(sd*-.038,-.03,.012);hand.add(th);var tm=new T.Mesh(new T.BoxGeometry(.014,.044,.016),W);tm.position.y=-.022;th.add(tm);
+    var palm=new T.Mesh(new T.BoxGeometry(.06,.085,.03),D);palm.position.y=-.05;hand.add(palm);
+    var fingers=[];for(var f=0;f<4;f++){var fp=new T.Group();fp.position.set(sd*(-.022+f*.0145),-.092,0);hand.add(fp);
+      var f1=new T.Mesh(new T.BoxGeometry(.012,.036,.014),D);f1.position.y=-.018;fp.add(f1);
+      var f2=new T.Mesh(new T.BoxGeometry(.011,.03,.013),D);f2.position.y=-.05;fp.add(f2);fingers.push(fp);}
+    var th=new T.Group();th.position.set(sd*-.034,-.035,.012);hand.add(th);var tm=new T.Mesh(new T.BoxGeometry(.013,.045,.015),D);tm.position.y=-.022;th.add(tm);
     return {sh:sh,el:el,hand:hand,fingers:fingers,th:th};
   }
   var Ra=arm(1),La=arm(-1);
@@ -1572,7 +1568,7 @@ function updateBot(t){
   // head: look at camera, glance at crate while pointing
   vCam.copy(C.position);vBox.copy(bot.crate.position);
   vTmp.copy(vCam).lerp(vBox,wPoint*.75);bot.head.lookAt(vTmp);
-  bot.eye.material.color.setHex(Math.sin(t*2.2)>.95?0x0b2c33:0x4fe3ff);
+  bot.eye.material.color.setHex(Math.sin(t*2.2)>.95?0x1a1d20:0x8a9399);
   // crate attention
   var pulse=.5+.5*Math.sin(t*4);
   bot.cGlow.material.opacity=.15+.35*wPoint*pulse;bot.liLight.intensity=wPoint*(1+pulse);bot.crate.position.y=.33+wPoint*.04*pulse;
