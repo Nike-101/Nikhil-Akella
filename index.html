@@ -256,8 +256,6 @@ details.proj[data-exhibit][open]{border-color:rgba(79,227,255,.55);box-shadow:0 
 
 .pskills{display:flex;flex-direction:column;gap:14px;padding-top:6px}
 
-body.intro .top,body.intro .panel,body.intro .hud,body.intro #labels,body.intro .dtag,body.intro .edge-nav,body.intro .hint{opacity:0!important;pointer-events:none!important}
-.top,.hud,#labels,.edge-nav{transition:opacity .9s ease}
 
 /* ---------- HUD ---------- */
 .hud{position:fixed;z-index:4;left:var(--gl);right:var(--gr);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;align-items:center;gap:14px;pointer-events:none}
@@ -1614,46 +1612,6 @@ cv.addEventListener("pointermove",function(ev){
 });
 
 
-/* ---------- first-visit intro: gears drop in, everything else condenses out of particles ---------- */
-var INTRO=null;
-(function(){
-  var seen=false;try{seen=localStorage.getItem("na_intro_v1")==="1";}catch(_){}
-  if(seen||reduce)return;
-  try{localStorage.setItem("na_intro_v1","1");}catch(_){}
-  var keep=[floor,grid,dust,gbx,wall],hidden=[],box=new T.Box3(),sz=new T.Vector3(),tg=[];
-  S.updateMatrixWorld(true);
-  S.children.forEach(function(o){if(o.isLight||keep.indexOf(o)>=0||!o.visible)return;
-    box.setFromObject(o);if(box.isEmpty())return;box.getSize(sz);
-    var far=box.min.z<-60;var n=Math.max(6,Math.min(far?160:220,Math.round(Math.cbrt(Math.max(.02,sz.x*sz.y*sz.z))*14)));
-    for(var i=0;i<n;i++)tg.push(box.min.x+Math.random()*sz.x,box.min.y+Math.random()*sz.y,box.min.z+Math.random()*sz.z);
-    hidden.push(o);o.visible=false;});
-  var N=tg.length/3,st=new Float32Array(N*3),cur=new Float32Array(N*3),col=new Float32Array(N*3),dl=new Float32Array(N);
-  var ca=new T.Color(0x6fd0c4),cb=new T.Color(0xf2a93b),cc=new T.Color(0xe7edef);
-  for(var i=0;i<N;i++){var a=Math.random()*PI*2,r=18+Math.random()*40,h=6+Math.random()*30;
-    st[i*3]=tg[i*3]*.4+Math.cos(a)*r;st[i*3+1]=h;st[i*3+2]=tg[i*3+2]*.4+Math.sin(a)*r;
-    var c=Math.random()<.55?ca:(Math.random()<.6?cc:cb);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;dl[i]=Math.random()*.6;}
-  cur.set(st);
-  var pg=new T.BufferGeometry();pg.setAttribute("position",new T.BufferAttribute(cur,3));pg.setAttribute("color",new T.BufferAttribute(col,3));
-  var pm=new T.PointsMaterial({size:.09,vertexColors:true,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending});
-  var pts=new T.Points(pg,pm);S.add(pts);
-  var gs=gears.map(function(g,i){var y0=g.mesh.position.y;g.mesh.position.y=y0+16;return {m:g.mesh,y0:y0,d:.15+i*.07};});
-  document.body.classList.add("intro");
-  INTRO={t:0,done:false,hidden:hidden,shown:false,pts:pts,pm:pm,pg:pg,st:st,tg:tg,cur:cur,dl:dl,N:N,gs:gs};
-})();
-function bounce(x){var n=7.5625,d=2.75;if(x<1/d)return n*x*x;if(x<2/d)return n*(x-=1.5/d)*x+.75;if(x<2.5/d)return n*(x-=2.25/d)*x+.9375;return n*(x-=2.625/d)*x+.984375;}
-function updateIntro(dt){
-  var I=INTRO;I.t+=dt;var t=I.t;
-  I.gs.forEach(function(g){var k=Math.max(0,Math.min(1,(t-g.d)/1.0));g.m.position.y=g.y0+16*(1-bounce(k));});
-  I.pm.opacity=Math.min(1,t/.4)*(t<2.15?1:Math.max(0,1-(t-2.15)/.7));
-  for(var i=0;i<I.N;i++){var k=Math.max(0,Math.min(1,(t-.35-I.dl[i])/1.45));k=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
-    var j=i*3;I.cur[j]=I.st[j]+(I.tg[j]-I.st[j])*k;I.cur[j+1]=I.st[j+1]+(I.tg[j+1]-I.st[j+1])*k;I.cur[j+2]=I.st[j+2]+(I.tg[j+2]-I.st[j+2])*k;}
-  I.pg.attributes.position.needsUpdate=true;
-  if(!I.shown&&t>2.15){I.shown=true;I.hidden.forEach(function(o){o.visible=true;});}
-  if(!I.shown)I.hidden.forEach(function(o){o.visible=false;});
-  if(t>2.4)document.body.classList.remove("intro");
-  if(t>2.9){I.done=true;S.remove(I.pts);I.pg.dispose();I.pm.dispose();I.gs.forEach(function(g){g.m.position.y=g.y0;});}
-}
-
 /* ---------- camera ---------- */
 var PRE={
   overview:{p:[4,14,31],c:[1,4.5,-16],k:3},
@@ -1731,7 +1689,7 @@ show(location.hash.slice(1)||"overview",true);
 var orbR=new T.Vector3();var unitsEl=document.getElementById("units"),rpmEl=document.getElementById("rpm"),units=0,last=performance.now(),t=0,v3=new T.Vector3();
 var ease=function(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 function frame(now){
-  var rdt=Math.min(.1,(now-last)/1000),dt=Math.min(.05,rdt);last=now;var sp=reduce?.25:1;if(INTRO&&!INTRO.done)sp=0;t+=dt*sp;
+  var rdt=Math.min(.1,(now-last)/1000),dt=Math.min(.05,rdt);last=now;var sp=reduce?.25:1;t+=dt*sp;
 
   // camera
   if(flyT<1){flyT=Math.min(1,flyT+dt/FLY);var e=ease(flyT);
@@ -1784,7 +1742,6 @@ function frame(now){
   // dust
   var arr=dg.attributes.position.array;for(var d=0;d<DN;d++){arr[d*3+1]+=dt*.08*sp;if(arr[d*3+1]>12)arr[d*3+1]=0;}dg.attributes.position.needsUpdate=true;
 
-  if(INTRO&&!INTRO.done)updateIntro(rdt);
   R.render(S,C);
 
   // labels
