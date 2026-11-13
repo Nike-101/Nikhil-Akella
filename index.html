@@ -254,6 +254,11 @@ details.proj[data-exhibit][open]{border-color:rgba(79,227,255,.55);box-shadow:0 
 .lightbox img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .lb-close{position:absolute;top:max(14px, env(safe-area-inset-top,0px));right:max(14px, env(safe-area-inset-right,0px));width:40px;height:40px;border-radius:50%;border:1px solid var(--line-2);background:rgba(11,16,19,.8);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
 
+.pskills{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+
+body.intro .top,body.intro .panel,body.intro .hud,body.intro #labels,body.intro .dtag,body.intro .edge-nav,body.intro .hint{opacity:0!important;pointer-events:none!important}
+.top,.hud,#labels,.edge-nav{transition:opacity .9s ease}
+
 /* ---------- HUD ---------- */
 .hud{position:fixed;z-index:4;left:var(--gl);right:var(--gr);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;align-items:center;gap:14px;pointer-events:none}
 .hud > *{pointer-events:auto}
@@ -452,7 +457,12 @@ details.proj[data-exhibit][open]{border-color:rgba(79,227,255,.55);box-shadow:0 
       </div>
     </details>
   </div>
-  <div class="tags"><span class="tag">RCA</span><span class="tag">5 Whys</span><span class="tag">KPI design</span><span class="tag">Roadmaps</span><span class="tag">Six Sigma</span><span class="tag">FMEA</span><span class="tag">House of Quality</span></div>
+  <div class="eyebrow">Product skills</div>
+  <div class="pskills">
+    <div class="skillgrp"><h3>Discovery</h3><div class="chips"><span>User Research</span><span>Product-Market Fit Analysis</span><span>Competitive Teardowns</span></div></div>
+    <div class="skillgrp"><h3>Strategy</h3><div class="chips"><span>Outcome-Driven Roadmapping</span><span>Product Lifecycle Design</span></div></div>
+    <div class="skillgrp"><h3>Execution</h3><div class="chips"><span>KPI Definition &amp; Tracking</span><span>Root Cause Analysis</span></div></div>
+  </div>
 </section>
 
 <!-- ================= BIO ================= -->
@@ -1434,9 +1444,10 @@ function updateExhibits(t){
 /* =================== Contact: fit humanoid that waves, then points at LinkedIn =================== */
 var HX=-3,HZ=13.2,LI_URL="https://www.linkedin.com/in/nikhil101akella/";
 var bot=(function(){
-  var W=new T.MeshStandardMaterial({color:0xd3dadd,metalness:.35,roughness:.32});
-  var D=new T.MeshStandardMaterial({color:0x1d2529,metalness:.6,roughness:.4});
-  var V=new T.MeshStandardMaterial({color:0x07090a,metalness:.9,roughness:.15});
+  var W=new T.MeshStandardMaterial({color:0xeef1f2,metalness:.18,roughness:.3});
+  var D=new T.MeshStandardMaterial({color:0x14181b,metalness:.75,roughness:.32});
+  var G=new T.MeshStandardMaterial({color:0x5b646a,metalness:.85,roughness:.28});
+  var V=new T.MeshStandardMaterial({color:0x040506,metalness:.95,roughness:.06});
   var EYE=new T.MeshBasicMaterial({color:0x4fe3ff});
   function sp(r,sx,sy,sz,mat,par,x,y,z){var m=new T.Mesh(new T.SphereGeometry(r,28,18),mat);m.scale.set(sx,sy,sz);m.position.set(x||0,y||0,z||0);par.add(m);return m;}
   function cy(rt,rb,h,mat,par,x,y,z){var m=new T.Mesh(new T.CylinderGeometry(rt,rb,h,24),mat);m.position.set(x||0,y||0,z||0);par.add(m);return m;}
@@ -1445,40 +1456,62 @@ var bot=(function(){
   mesh(CYL(1.25,1.35,.08,64),new T.MeshStandardMaterial({color:0x111a1e,metalness:.4,roughness:.5}),root,M.edge).position.y=-.04;
   var ring=new T.Mesh(new T.TorusGeometry(1.32,.025,10,120),new T.MeshBasicMaterial({color:0x4fe3ff}));ring.rotation.x=PI/2;ring.position.y=.01;root.add(ring);
   var body=new T.Group();root.add(body);
-  // legs
-  [-1,1].forEach(function(sd){var hip=new T.Group();hip.position.set(sd*.1,.96,0);body.add(hip);
-    cy(.088,.062,.42,W,hip,0,-.21,0);sp(.07,1,1.25,1,W,hip,0,-.12,.02);
-    sp(.052,1,1,1,D,hip,0,-.43,0);
-    cy(.06,.04,.42,W,hip,0,-.65,0);sp(.05,1,1.6,1,W,hip,0,-.56,-.025);
-    var ft=new T.Mesh(new T.BoxGeometry(.1,.06,.24),D);ft.position.set(0,-.9,.05);hip.add(ft);
-    hip.rotation.z=sd*.04;});
-  // pelvis, abs, chest
-  sp(.16,1.05,.62,.75,D,body,0,.98,0);
-  cy(.12,.14,.2,D,body,0,1.1,0);
-  var abs=cy(.15,.125,.22,W,body,0,1.22,0);abs.scale.z=.72;
-  for(var i=0;i<3;i++){var ln=new T.Mesh(new T.BoxGeometry(.13,.006,.01),D);ln.position.set(0,1.15+i*.06,.105);body.add(ln);}
-  sp(.2,1.35,.82,.78,W,body,0,1.43,0);
-  var pec=new T.Mesh(new T.BoxGeometry(.006,.16,.02),D);pec.position.set(0,1.44,.15);body.add(pec);
-  // neck + head
-  cy(.048,.055,.1,D,body,0,1.62,0);
-  var head=new T.Group();head.position.set(0,1.74,0);body.add(head);
-  sp(.1,1,1.22,1.08,W,head);
-  sp(.088,1,.62,.75,V,head,0,.01,.05);
-  var eye=new T.Mesh(new T.BoxGeometry(.11,.012,.01),EYE);eye.position.set(0,.02,.115);head.add(eye);
-  [-1,1].forEach(function(sd){var ear=cy(.03,.03,.03,D,head,sd*.1,0,0);ear.rotation.z=PI/2;});
-  // arms
+  function tc(rt,rb,h,mat,par,x,y,z,seg){var m=new T.Mesh(new T.CylinderGeometry(rt,rb,h,seg||28),mat);m.position.set(x||0,y||0,z||0);par.add(m);return m;}
+  // ---- legs: hip -> knee -> ankle chain so they can bend ----
+  var legs=[];
+  [-1,1].forEach(function(sd){
+    var hip=new T.Group();hip.position.set(sd*.1,.93,0);body.add(hip);
+    sp(.062,1,1,1,D,hip);                                   // hip actuator
+    var th=tc(.086,.064,.36,W,hip,0,-.2,.005);th.scale.z=.92; // thigh shell
+    sp(.07,1,1.9,.85,W,hip,0,-.2,.03);                        // quad contour
+    tc(.03,.03,.3,G,hip,sd*-.05,-.22,-.02,12);                // inner actuator rod
+    var knee=new T.Group();knee.position.y=-.42;hip.add(knee);
+    sp(.052,1,1,1,D,knee);var kc=sp(.04,1,.75,.45,D,knee,0,.01,.035);  // knee joint + cap
+    tc(.062,.044,.36,W,knee,0,-.2,0);                          // shin shell
+    sp(.055,.95,2.1,.9,W,knee,0,-.15,-.03);                    // calf
+    tc(.022,.022,.3,G,knee,0,-.2,-.05,10);                     // achilles actuator
+    var ank=new T.Group();ank.position.y=-.42;knee.add(ank);
+    sp(.038,1,1,1,D,ank);
+    var ft=new T.Mesh(new T.BoxGeometry(.095,.05,.23),W);ft.position.set(0,-.045,.045);ank.add(ft);
+    var sole=new T.Mesh(new T.BoxGeometry(.1,.022,.24),D);sole.position.set(0,-.075,.045);ank.add(sole);
+    var toe=sp(.048,1,.5,.6,W,ank,0,-.045,.16);
+    legs.push({hip:hip,knee:knee,ank:ank,sd:sd});
+  });
+  // ---- pelvis, waist, torso ----
+  sp(.16,1.05,.55,.72,D,body,0,.97,0);
+  var pelv=sp(.15,1.05,.42,.75,W,body,0,.99,.012);
+  tc(.095,.11,.16,D,body,0,1.1,0);                             // waist actuator
+  var abs1=tc(.13,.118,.08,D,body,0,1.15,0);abs1.scale.z=.74;
+  var abs2=tc(.142,.13,.08,D,body,0,1.235,0);[1.115,1.19,1.275].forEach(function(y,i){var r=tc(.124+i*.012,.124+i*.012,.012,G,body,0,y,0);r.scale.z=.74;});abs2.scale.z=.74;
+  var chest=new T.Group();chest.position.y=1.42;body.add(chest);
+  sp(.19,1.28,.9,.7,W,chest);                                   // chest shell
+  var pecL=sp(.1,1.15,.62,.4,W,chest,-.085,.035,.1),pecR=sp(.1,1.15,.62,.4,W,chest,.085,.035,.1); // pec plates
+  [-1,1].forEach(function(sd){var sl=new T.Mesh(new T.BoxGeometry(.13,.005,.012),D);sl.position.set(sd*.07,-.035,.132);sl.rotation.z=sd*.42;chest.add(sl);});
+  var collar=tc(.07,.11,.05,D,chest,0,.16,0);collar.scale.z=.7;
+  var pack=new T.Mesh(new T.BoxGeometry(.24,.3,.08),D);pack.position.set(0,-.02,-.15);chest.add(pack);
+  // ---- neck + head ----
+  tc(.04,.05,.09,D,body,0,1.6,-.005);
+  var head=new T.Group();head.position.set(0,1.72,0);body.add(head);
+  sp(.102,1,1.16,1.12,W,head);                                  // helmet
+  var visor=new T.Mesh(new T.SphereGeometry(.104,40,24,PI/2-1.0,2.0,.62,1.38),V);visor.scale.set(1.01,1.17,1.13);visor.position.z=.004;head.add(visor);
+  sp(.04,1.6,1,1,D,head,0,-.09,-.01);                           // jaw/neck joint
+  var eye=new T.Mesh(new T.BoxGeometry(.09,.006,.004),EYE);eye.position.set(0,.02,.116);head.add(eye);
+  // ---- arms ----
   function arm(sd){
-    var sh=new T.Group();sh.position.set(sd*.28,1.48,0);body.add(sh);
-    sp(.088,1,1,1,W,sh);
-    cy(.056,.05,.26,W,sh,0,-.14,0);sp(.05,1.05,1.5,1.1,W,sh,0,-.14,.03);
-    var el=new T.Group();el.position.y=-.28;sh.add(el);
-    sp(.045,1,1,1,D,el);
-    cy(.047,.036,.25,W,el,0,-.13,0);
-    var hand=new T.Group();hand.position.y=-.27;el.add(hand);
-    var palm=new T.Mesh(new T.BoxGeometry(.075,.085,.03),D);palm.position.y=-.04;hand.add(palm);
-    var fingers=[];for(var f=0;f<4;f++){var fp=new T.Group();fp.position.set(sd*(-.028+f*.019),-.085,0);hand.add(fp);
-      var fm=new T.Mesh(new T.BoxGeometry(.014,.06,.016),W);fm.position.y=-.03;fp.add(fm);fingers.push(fp);}
-    var th=new T.Group();th.position.set(sd*-.04,-.035,.01);hand.add(th);var tm=new T.Mesh(new T.BoxGeometry(.014,.045,.016),W);tm.position.y=-.022;th.add(tm);
+    var sh=new T.Group();sh.position.set(sd*.26,1.49,0);body.add(sh);
+    sp(.066,1.1,1,1,W,sh);sp(.048,1,1,1,D,sh,sd*-.035,0,0);
+    tc(.056,.047,.25,W,sh,0,-.15,0);sp(.05,1,1.7,1.05,W,sh,0,-.13,.02);
+    var el=new T.Group();el.position.y=-.29;sh.add(el);
+    sp(.043,1,1,1,D,el);
+    tc(.05,.036,.24,W,el,0,-.14,0);sp(.045,1,1.9,1,W,el,0,-.09,0);
+    var hand=new T.Group();hand.position.y=-.28;el.add(hand);
+    sp(.03,1,1,1,D,hand);
+    var palm=new T.Mesh(new T.BoxGeometry(.07,.08,.028),D);palm.position.y=-.045;hand.add(palm);
+    var back=new T.Mesh(new T.BoxGeometry(.066,.07,.01),W);back.position.set(0,-.042,-.017);hand.add(back);
+    var fingers=[];for(var f=0;f<4;f++){var fp=new T.Group();fp.position.set(sd*(-.026+f*.0175),-.087,0);hand.add(fp);
+      var f1=new T.Mesh(new T.BoxGeometry(.013,.034,.015),W);f1.position.y=-.017;fp.add(f1);
+      var f2=new T.Mesh(new T.BoxGeometry(.012,.028,.014),D);f2.position.y=-.047;fp.add(f2);fingers.push(fp);}
+    var th=new T.Group();th.position.set(sd*-.038,-.03,.012);hand.add(th);var tm=new T.Mesh(new T.BoxGeometry(.014,.044,.016),W);tm.position.y=-.022;th.add(tm);
     return {sh:sh,el:el,hand:hand,fingers:fingers,th:th};
   }
   var Ra=arm(1),La=arm(-1);
@@ -1493,7 +1526,7 @@ var bot=(function(){
   cGlow.rotation.x=-PI/2;cGlow.position.set(HX+.95,.09,HZ+.7);S.add(cGlow);
   var liLight=new T.PointLight(0x4fa8ff,0,4,2);liLight.position.set(HX+.95,1.1,HZ+1.1);S.add(liLight);
   var key=new T.PointLight(0xdfefff,.9,9,2);key.position.set(HX+1.5,3,HZ+3);S.add(key);
-  return {root:root,body:body,head:head,eye:eye,R:Ra,L:La,crate:crate,cGlow:cGlow,liLight:liLight,ring:ring};
+  return {root:root,body:body,head:head,eye:eye,chest:chest,legs:legs,R:Ra,L:La,crate:crate,cGlow:cGlow,liLight:liLight,ring:ring};
 })();
 // poses (body-local unit vectors for the upper arm)
 var DOWN=new T.Vector3(0,-1,0);
@@ -1531,7 +1564,13 @@ function updateBot(t){
   bot.L.sh.quaternion.copy(qRestL);bot.L.el.rotation.set(-.15-Math.sin(t*1.3)*.04,0,0);
   bot.L.fingers.forEach(function(f){f.rotation.x=.35;});
   // body: breathing, slight lean toward the crate when pointing
-  bot.body.position.y=Math.sin(t*1.6)*.006;bot.body.rotation.y=-.18*wPoint;bot.body.rotation.z=.03*wPoint;
+  // living stance: soft knees, weight shift, breathing
+  var kb=.1+.035*Math.sin(t*1.3)+.04*wPoint,sway=.022*Math.sin(t*.8);
+  bot.legs.forEach(function(L){var k=kb+(L.sd>0?Math.max(0,-sway)*3:Math.max(0,sway)*3);
+    L.hip.rotation.x=-k;L.knee.rotation.x=2*k;L.ank.rotation.x=-k;L.hip.rotation.z=-sway*.9;L.ank.rotation.z=sway*.9;});
+  bot.body.position.y=-.84*(1-Math.cos(kb));bot.body.position.x=sway;
+  bot.chest.scale.set(1+.012*Math.sin(t*1.6),1,1+.018*Math.sin(t*1.6));
+  bot.body.rotation.y=-.18*wPoint;bot.body.rotation.z=.03*wPoint-sway*.4;
   // head: look at camera, glance at crate while pointing
   vCam.copy(C.position);vBox.copy(bot.crate.position);
   vTmp.copy(vCam).lerp(vBox,wPoint*.75);bot.head.lookAt(vTmp);
@@ -1573,6 +1612,47 @@ cv.addEventListener("pointermove",function(ev){
   var objs=photoPlanes.concat(cHits);Object.keys(exhibits).forEach(function(k){objs.push(exhibits[k].base);});
   cv.style.cursor=rc.intersectObjects(objs,true).length?"pointer":"";
 });
+
+
+/* ---------- first-visit intro: gears drop in, everything else condenses out of particles ---------- */
+var INTRO=null;
+(function(){
+  var seen=false;try{seen=localStorage.getItem("na_intro_v1")==="1";}catch(_){}
+  if(seen||reduce)return;
+  try{localStorage.setItem("na_intro_v1","1");}catch(_){}
+  var keep=[floor,grid,dust,gbx,wall],hidden=[],box=new T.Box3(),sz=new T.Vector3(),tg=[];
+  S.updateMatrixWorld(true);
+  S.children.forEach(function(o){if(o.isLight||keep.indexOf(o)>=0||!o.visible)return;
+    box.setFromObject(o);if(box.isEmpty())return;box.getSize(sz);
+    var far=box.min.z<-60;var n=Math.max(6,Math.min(far?160:220,Math.round(Math.cbrt(Math.max(.02,sz.x*sz.y*sz.z))*14)));
+    for(var i=0;i<n;i++)tg.push(box.min.x+Math.random()*sz.x,box.min.y+Math.random()*sz.y,box.min.z+Math.random()*sz.z);
+    hidden.push(o);o.visible=false;});
+  var N=tg.length/3,st=new Float32Array(N*3),cur=new Float32Array(N*3),col=new Float32Array(N*3),dl=new Float32Array(N);
+  var ca=new T.Color(0x6fd0c4),cb=new T.Color(0xf2a93b),cc=new T.Color(0xe7edef);
+  for(var i=0;i<N;i++){var a=Math.random()*PI*2,r=18+Math.random()*40,h=6+Math.random()*30;
+    st[i*3]=tg[i*3]*.4+Math.cos(a)*r;st[i*3+1]=h;st[i*3+2]=tg[i*3+2]*.4+Math.sin(a)*r;
+    var c=Math.random()<.55?ca:(Math.random()<.6?cc:cb);col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;dl[i]=Math.random()*.6;}
+  cur.set(st);
+  var pg=new T.BufferGeometry();pg.setAttribute("position",new T.BufferAttribute(cur,3));pg.setAttribute("color",new T.BufferAttribute(col,3));
+  var pm=new T.PointsMaterial({size:.09,vertexColors:true,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending});
+  var pts=new T.Points(pg,pm);S.add(pts);
+  var gs=gears.map(function(g,i){var y0=g.mesh.position.y;g.mesh.position.y=y0+16;return {m:g.mesh,y0:y0,d:.15+i*.07};});
+  document.body.classList.add("intro");
+  INTRO={t:0,done:false,hidden:hidden,shown:false,pts:pts,pm:pm,pg:pg,st:st,tg:tg,cur:cur,dl:dl,N:N,gs:gs};
+})();
+function bounce(x){var n=7.5625,d=2.75;if(x<1/d)return n*x*x;if(x<2/d)return n*(x-=1.5/d)*x+.75;if(x<2.5/d)return n*(x-=2.25/d)*x+.9375;return n*(x-=2.625/d)*x+.984375;}
+function updateIntro(dt){
+  var I=INTRO;I.t+=dt;var t=I.t;
+  I.gs.forEach(function(g){var k=Math.max(0,Math.min(1,(t-g.d)/1.0));g.m.position.y=g.y0+16*(1-bounce(k));});
+  I.pm.opacity=Math.min(1,t/.4)*(t<2.15?1:Math.max(0,1-(t-2.15)/.7));
+  for(var i=0;i<I.N;i++){var k=Math.max(0,Math.min(1,(t-.35-I.dl[i])/1.45));k=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+    var j=i*3;I.cur[j]=I.st[j]+(I.tg[j]-I.st[j])*k;I.cur[j+1]=I.st[j+1]+(I.tg[j+1]-I.st[j+1])*k;I.cur[j+2]=I.st[j+2]+(I.tg[j+2]-I.st[j+2])*k;}
+  I.pg.attributes.position.needsUpdate=true;
+  if(!I.shown&&t>2.15){I.shown=true;I.hidden.forEach(function(o){o.visible=true;});}
+  if(!I.shown)I.hidden.forEach(function(o){o.visible=false;});
+  if(t>2.4)document.body.classList.remove("intro");
+  if(t>2.9){I.done=true;S.remove(I.pts);I.pg.dispose();I.pm.dispose();I.gs.forEach(function(g){g.m.position.y=g.y0;});}
+}
 
 /* ---------- camera ---------- */
 var PRE={
@@ -1651,7 +1731,7 @@ show(location.hash.slice(1)||"overview",true);
 var orbR=new T.Vector3();var unitsEl=document.getElementById("units"),rpmEl=document.getElementById("rpm"),units=0,last=performance.now(),t=0,v3=new T.Vector3();
 var ease=function(x){return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
 function frame(now){
-  var dt=Math.min(.05,(now-last)/1000);last=now;var sp=reduce?.25:1;t+=dt*sp;
+  var rdt=Math.min(.1,(now-last)/1000),dt=Math.min(.05,rdt);last=now;var sp=reduce?.25:1;if(INTRO&&!INTRO.done)sp=0;t+=dt*sp;
 
   // camera
   if(flyT<1){flyT=Math.min(1,flyT+dt/FLY);var e=ease(flyT);
@@ -1704,6 +1784,7 @@ function frame(now){
   // dust
   var arr=dg.attributes.position.array;for(var d=0;d<DN;d++){arr[d*3+1]+=dt*.08*sp;if(arr[d*3+1]>12)arr[d*3+1]=0;}dg.attributes.position.needsUpdate=true;
 
+  if(INTRO&&!INTRO.done)updateIntro(rdt);
   R.render(S,C);
 
   // labels
